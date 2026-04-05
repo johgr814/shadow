@@ -14,12 +14,17 @@ The idea of this project is to only define the 'core' entities and then define e
 4. Serve as a build-time resource for automation tools
 
 # Technology
-TypeScript and node are chosen since so that a server is not required to edit and view templates.
+TypeScript and node are chosen, so that a server is not required to edit and view resources. Engine should also work client-side only.
 Mustache is choosen as template language since it available on so many platforms and have a clear boundry of being logic-less.
 gray-matter - for getting metadata from mustache templates
 Json-Schema will be used to express the framework as well as the resoueces it holds.
+Frontend will be build vith a minimum of vanilla js. Front-end will be "pure HTML" as much as possible. All markup will be minimalistic and semanticly correct. Pico css class-less for styling.  
 
 # Architecture
+
+## Resource tree – rest centric
+Conceptually, the app will be a route-based resource tree. Collections will make up the resources tree. The default loader will have a set of a few collections making up the url structure
+
 
 ## Concepts for user of shadow
 ### instance
@@ -56,7 +61,7 @@ A template that defines the output of a resource together with matter meta-data 
 ### resource meta-data
 The matter meta-data that is used to define the resource template. Plus schema 
 
-## Internal concepts 
+## Internal concepts – Pluggable interfaces making up the application
 
 ### router – (IExternalRouter       resolve(url : Url) : IResource)
 Takes an external url 'stripped from root context' and returns a resource.
@@ -69,15 +74,23 @@ Takes an IProducer and returns an array of data.
 
 ## engine - IEngine (url: Url) : IRenderedTemplateOutput
 Takes an external url and strips it from the root context.
-The calls the router and and gets the resource.
+Calls the router and gets the resource.
+Examines resource meta-data.
 Iterates over sources in resource meta-data.
-Calls internal-router on each source.
-Calls loader on with each producer.
-Then executes the template passing data and returns the result.
+    — Calls internal-router on each source.
+    — Calls loader on with each producer.
+
+Then executes the template passing data from sources and returns the result.
 
 # server - IServer(config : IConfig)
 IServer 
     - method for accepting requests
+    - Should be instantiated with a config object.
+
+# config - IConfig
+IConfig - a config contains instances of router, internal-router, loader and engine. Making up the application.
+
+
 
 
 
