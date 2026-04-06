@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shadow.thruput.se/schemas/reference.schema.json",
+  "title": "Reference",
+  "description": "A reference extends a producer with a URL pointing to an external data source",
+  "allOf": [
+    { "$ref": "producer.schema.json" }
+  ],
+  "properties": {
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URI pointing to the external data source"
+    }
+  },
+  "required": ["name", "slug", "concept", "url"],
+  "unevaluatedProperties": false
+}

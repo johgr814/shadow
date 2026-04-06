@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shadow.thruput.se/schemas/producer.schema.json",
+  "title": "Producer",
+  "description": "A producer is a directory that describes an entity and how to derive it",
+  "type": "object",
+  "properties": {
+    "name": {
+      "$ref": "main.schema.json#/$defs/Name"
+    },
+    "slug": {
+      "$ref": "main.schema.json#/$defs/Slug"
+    },
+    "concept": {
+      "$ref": "main.schema.json#/$defs/Concept"
+    }
+  },
+  "required": ["name", "slug", "concept"],
+  "unevaluatedProperties": false
+}

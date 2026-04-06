@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://shadow.thruput.se/schemas/concepts/schema.json",
+  "title": "Concept - Root collection of resource tree",
+  "$ref": "../main.schema.json#/$defs/Concept"
+}
