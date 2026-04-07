@@ -14,7 +14,7 @@
     "format": "biome format . --write",
     "knip": "knip",
     "knip:fix": "knip --fix",
-    "test:e2e": "pnpm --filter @shadow/backend test:e2e",
+    "test:e2e": "pnpm --filter @shadow/e2e test:e2e",
     "package": "pnpm build",
     "deps:update": "pnpm update --recursive --latest",
     "ci": "pnpm run lint && pnpm run knip && pnpm run typecheck && pnpm run test:e2e"

@@ -1,54 +1,44 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import git from 'isomorphic-git';
+import { createFsFromVolume, vol } from 'memfs';
 import type { IContent } from './content.js';
 import type { IStorage } from './interfaces.js';
-import type { InstancesDir } from './interfaces.js';
 import type { IResourceTemplate } from './resource.js';
 import type { Surl } from './url.js';
 
+const INSTANCES_DIR = '/instances';
+
+const memFs = createFsFromVolume(vol);
+
+vol.mkdirSync(INSTANCES_DIR, { recursive: true });
+
+await git.init({ fs: memFs, dir: INSTANCES_DIR });
+
 export class GitStorage implements IStorage {
-  private constructor(private readonly dir: string) {}
-
-  static of(instancesDir: InstancesDir): GitStorage {
-    return new GitStorage(instancesDir.toString());
-  }
-
   query(_surl: Surl): IContent {
-    const resourcesDir = path.join(this.dir, 'resources');
-    if (!fs.existsSync(resourcesDir)) {
-      return { surl: _surl };
-    }
     return { surl: _surl };
   }
 
   async saveResource(surl: Surl, def: IResourceTemplate): Promise<void> {
-    const resourcesDir = path.join(this.dir, 'resources');
-    fs.mkdirSync(resourcesDir, { recursive: true });
-
-    const filePath = path.join(resourcesDir, `${surl.toString()}.mustache`);
-    fs.writeFileSync(filePath, def.body.toString(), 'utf-8');
+    const filename = `${surl.toString()}.mustache`;
+    memFs.writeFileSync(`${INSTANCES_DIR}/${filename}`, def.body.toString(), {
+      encoding: 'utf-8',
+    });
 
     await git.add({
-      fs,
-      dir: this.dir,
-      filepath: `resources/${surl.toString()}.mustache`,
+      fs: memFs,
+      dir: INSTANCES_DIR,
+      filepath: filename,
     });
     await git.commit({
-      fs,
-      dir: this.dir,
+      fs: memFs,
+      dir: INSTANCES_DIR,
       message: `Add resource ${surl.toString()}`,
       author: { name: 'shadow', email: 'shadow@local' },
     });
   }
 
   listResources(): ReadonlyArray<string> {
-    const resourcesDir = path.join(this.dir, 'resources');
-    if (!fs.existsSync(resourcesDir)) {
-      return [];
-    }
-    return fs
-      .readdirSync(resourcesDir)
+    return (memFs.readdirSync(INSTANCES_DIR) as string[])
       .filter((f) => f.endsWith('.mustache'))
       .map((f) => f.replace(/\.mustache$/, ''));
   }

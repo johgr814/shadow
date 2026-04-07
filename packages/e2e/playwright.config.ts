@@ -1,15 +1,16 @@
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: './tests',
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'tsx src/main.ts',
+    command: 'pnpm --filter @shadow/backend start',
     url: 'http://localhost:3000',
     reuseExistingServer: false,
-    timeout: 3_000,
+    timeout: 10_000,
+    cwd: '../../',
   },
 });

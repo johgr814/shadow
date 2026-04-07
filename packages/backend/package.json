@@ -6,15 +6,12 @@
   "type": "module",
   "scripts": {
     "start": "tsx src/main.ts",
-    "typecheck": "tsc --noEmit",
-    "test:e2e": "playwright test"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@shadow/shared": "workspace:*",
-    "isomorphic-git": "^1.27.2"
+    "@shadow/shared": "workspace:*"
   },
   "devDependencies": {
-    "@playwright/test": "^1.53.2",
     "@types/node": "^24.7.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

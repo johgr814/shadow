@@ -13,7 +13,6 @@ export type { IResponse } from './response.js';
 export {
   HttpMethod,
   RequestBody,
-  InstancesDir,
 } from './interfaces.js';
 export type {
   IRouter,

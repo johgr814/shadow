@@ -10,6 +10,7 @@ export interface IRouter {
 export interface IStorage {
   query(surl: Surl): IContent;
   saveResource(surl: Surl, def: IResourceTemplate): Promise<void>;
+  listResources(): ReadonlyArray<string>;
 }
 
 export interface IEngine {
@@ -28,7 +29,6 @@ export interface IConfig {
   readonly router: IRouter;
   readonly storage: IStorage;
   readonly engine: IEngine;
-  readonly instancesDir: InstancesDir;
 }
 
 export class HttpMethod {
@@ -63,21 +63,6 @@ export class RequestBody {
 
   static of(value: string): RequestBody {
     return new RequestBody(value);
-  }
-
-  toString(): string {
-    return this.value;
-  }
-}
-
-export class InstancesDir {
-  private constructor(private readonly value: string) {}
-
-  static of(value: string): InstancesDir {
-    if (!value || value.trim().length === 0) {
-      throw new Error('InstancesDir must not be empty');
-    }
-    return new InstancesDir(value);
   }
 
   toString(): string {

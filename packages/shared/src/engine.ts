@@ -1,19 +1,22 @@
 import type { HtmlRenderer } from './htmlRenderer.js';
-import type { IEngine, RequestBody } from './interfaces.js';
-import type { HttpMethod } from './interfaces.js';
+import type {
+  HttpMethod,
+  IEngine,
+  IStorage,
+  RequestBody,
+} from './interfaces.js';
 import { TemplateBody } from './resource.js';
 import type { IResponse } from './response.js';
 import { ContentType, RedirectLocation, Response } from './response.js';
-import type { GitStorage } from './storage.js';
 import { Surl, type Url } from './url.js';
 
 export class Engine implements IEngine {
   private constructor(
-    private readonly storage: GitStorage,
+    private readonly storage: IStorage,
     private readonly renderer: HtmlRenderer,
   ) {}
 
-  static of(storage: GitStorage, renderer: HtmlRenderer): Engine {
+  static of(storage: IStorage, renderer: HtmlRenderer): Engine {
     return new Engine(storage, renderer);
   }
 

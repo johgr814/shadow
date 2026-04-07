@@ -1,19 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/package",
-  "name": "@shadow/shared",
+  "name": "@shadow/e2e",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "dependencies": {
-    "ejs": "^3.1.10",
-    "isomorphic-git": "^1.27.2",
-    "memfs": "^4.57.1"
+  "scripts": {
+    "test:e2e": "playwright test",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/ejs": "^3.1.5",
+    "@playwright/test": "^1.53.2",
     "@types/node": "^24.7.2",
     "typescript": "^5.9.3"
   }

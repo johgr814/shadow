@@ -1,15 +1,4 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import { expect, test } from '@playwright/test';
-
-const instancesE2eDir = path.resolve('instances', 'e2e');
-
-test.beforeEach(async () => {
-  const resourcesDir = path.join(instancesE2eDir, 'resources');
-  if (fs.existsSync(resourcesDir)) {
-    fs.rmSync(resourcesDir, { recursive: true, force: true });
-  }
-});
 
 test('shows prompt to create resource when installation is empty', async ({
   page,
@@ -76,9 +65,7 @@ test('creates resource and redirects to index showing new resource', async ({
   await expect(createLink).toBeVisible();
 });
 
-test('stored resource file exists in git repo after creation', async ({
-  page,
-}) => {
+test('stored resource is listed on index after creation', async ({ page }) => {
   await page.goto('/new-resource');
 
   await page.getByLabel('Resource name').fill('my-config');
@@ -88,13 +75,6 @@ test('stored resource file exists in git repo after creation', async ({
 
   await expect(page).toHaveURL('/');
 
-  const storedFile = path.join(
-    instancesE2eDir,
-    'resources',
-    'my-config.mustache',
-  );
-  expect(fs.existsSync(storedFile)).toBe(true);
-
-  const content = fs.readFileSync(storedFile, 'utf-8');
-  expect(content).toBe('{{! config template }}');
+  const resourceItem = page.getByText('my-config');
+  await expect(resourceItem).toBeVisible();
 });
