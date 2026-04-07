@@ -81,7 +81,7 @@ validateProducer(url: Surl, def : IProducer) : void
 validateData(data: Surl, item : Object) : void
  
 
-### store – IStore
+### gitStorage - IStorage
 Facade for isomorphic-git, should be kept generic so that it can be used with other storage solutions.
 
 query(surl: Surl) : IContent
@@ -93,7 +93,10 @@ saveData(data: Surl, item : Object) : void
 ### htmlRenderer
 Abstraction on top of ejs. HAve methods for each type of content.
 
-### engine - IEngine (url: Url) : Response
+### engine - IEngine 
+handle(url: Url) : Response
+
+
 Takes an external url and strips it from the root context.
 Calls the router and gets the IContent. If it is an IProducer or IResource, it follows the sources, recursevliy.
 In case of resource a Response with defined MIME-type is returned. In case of structural content htmllRenderer is used.

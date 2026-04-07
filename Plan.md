@@ -39,13 +39,14 @@ User surfs to index page, since the installation is empty he will be prompted to
 
 ### Implementation details:
 Index pages pass the "/" route to ServerBackend.ts. ServerBackend.ts calls directly calls engine.ts that calls router for the route("/") and so on. A 200 response is sent back. UI then shows available actons to the user.
-User click on "Create new resource" and the app navigates to the new resource page (new-resource.html). This is full page redirect. No state is maintained. Post action in new resource page will post to "realtive current path" only "/" in this case. 
+User click on "Create new resource" and the app navigates to the new resource page (new-resource.html). This is full page redirect. No state is maintained. Post action in new resource page will post to "realtive current path" only "/" in this case.
 User fills in the template in the template editor. 
 ####
 new-resource.html
 Consists of third party template editor. And an html for that can submit the template. Template is posted as a IResourceTemplate. 
 
 User click on "Save " the payload is sent to the backend via normal http form/post.
+Validation failures rerenders the page with errors.
 Create collection is not implemented in this use case.
 Engine.ts calls router and since it is a post storage will be called. Storage uses ismorphic-git to store the template in a the local instance folder.
 A target for starting the app shuold be added to package.json. 
@@ -59,6 +60,9 @@ ServerBackend.ts will be the only component inside the backend folder right now.
 For this scenario all js code should be executed backend-side. But be kept in shared folder, since next task will be making the client backend.
 Interaction wih git server will be done via storage.ts code in shared folder as earlier stated
 Linting and formatting is working and applies to all code as well as test code - test should be included
+
+No primitives will be allowed in any interfaces all arguments and return values should be typed.
+
 ###
 a e2e test file for named 'resource.create' should be run as use case 1 stipulates.
 
