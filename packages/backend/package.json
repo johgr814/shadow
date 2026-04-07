@@ -3,5 +3,20 @@
   "name": "@shadow/backend",
   "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@shadow/shared": "workspace:*",
+    "isomorphic-git": "^1.27.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.53.2",
+    "@types/node": "^24.7.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
 }

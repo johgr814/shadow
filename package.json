@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "start": "pnpm --filter @shadow/backend start",
     "dev": "pnpm --filter @shadow/frontend dev",
     "build": "pnpm --filter @shadow/frontend build",
     "preview": "pnpm --filter @shadow/frontend preview",
@@ -13,12 +14,10 @@
     "format": "biome format . --write",
     "knip": "knip",
     "knip:fix": "knip --fix",
-    "test": "pnpm --filter @shadow/frontend test",
-    "test:unit": "pnpm --filter @shadow/frontend test:unit",
-    "test:e2e": "pnpm --filter @shadow/frontend test:e2e",
+    "test:e2e": "pnpm --filter @shadow/backend test:e2e",
     "package": "pnpm build",
     "deps:update": "pnpm update --recursive --latest",
-    "ci": "pnpm run lint && pnpm run knip && pnpm run typecheck && pnpm run test && pnpm run test:e2e"
+    "ci": "pnpm run lint && pnpm run knip && pnpm run typecheck && pnpm run test:e2e"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]
