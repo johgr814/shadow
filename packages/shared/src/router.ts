@@ -12,6 +12,8 @@ export class Router implements IRouter {
   }
 
   resolve(url: Url): IContent {
-    return this.storage.query(Surl.of(url.toString()));
+    return this.storage.query(
+      Surl.of(url.toString(), url.contentType, url.shadowGitUrl),
+    );
   }
 }

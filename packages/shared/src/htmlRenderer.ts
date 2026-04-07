@@ -1,5 +1,4 @@
 import ejs from 'ejs';
-import { ResponseBody } from './response.js';
 
 interface IndexViewModel {
   readonly resources: ReadonlyArray<string>;
@@ -71,11 +70,11 @@ const NEW_RESOURCE_TEMPLATE = `<!DOCTYPE html>
 </html>`;
 
 export class HtmlRenderer {
-  renderIndex(viewModel: IndexViewModel): ResponseBody {
-    return ResponseBody.of(ejs.render(INDEX_TEMPLATE, viewModel));
+  renderIndex(viewModel: IndexViewModel): string {
+    return ejs.render(INDEX_TEMPLATE, viewModel);
   }
 
-  renderNewResource(viewModel: NewResourceViewModel): ResponseBody {
-    return ResponseBody.of(ejs.render(NEW_RESOURCE_TEMPLATE, viewModel));
+  renderNewResource(viewModel: NewResourceViewModel): string {
+    return ejs.render(NEW_RESOURCE_TEMPLATE, viewModel);
   }
 }

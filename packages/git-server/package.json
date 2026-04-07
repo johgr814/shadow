@@ -1,23 +1,22 @@
 {
   "$schema": "https://json.schemastore.org/package",
-  "name": "@shadow/shared",
+  "name": "@shadow/git-server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit"
-  },
   "exports": {
     ".": "./src/index.ts"
   },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
   "dependencies": {
-    "ejs": "^3.1.10",
-    "isomorphic-git": "^1.27.2",
-    "memfs": "^4.57.1"
+    "git-http-backend": "^1.1.2",
+    "isomorphic-git": "^1.27.2"
   },
   "devDependencies": {
-    "@types/ejs": "^3.1.5",
+    "@types/git-http-backend": "^1.0.4",
     "@types/node": "^24.7.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.2"

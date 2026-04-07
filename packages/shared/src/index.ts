@@ -1,19 +1,8 @@
 export { Url, Surl } from './url.js';
+export { ContentTypeHeader, ShadowGitUrlHeader } from './httpHeaders.js';
 export type { IContent } from './content.js';
 export type { IResource, IResourceTemplate } from './resource.js';
 export { TemplateBody } from './resource.js';
-export {
-  HttpStatus,
-  ResponseBody,
-  RedirectLocation,
-  ContentType,
-  Response,
-} from './response.js';
-export type { IResponse } from './response.js';
-export {
-  HttpMethod,
-  RequestBody,
-} from './interfaces.js';
 export type {
   IRouter,
   IStorage,

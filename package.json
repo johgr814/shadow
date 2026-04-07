@@ -17,7 +17,8 @@
     "test:e2e": "pnpm --filter @shadow/e2e test:e2e",
     "package": "pnpm build",
     "deps:update": "pnpm update --recursive --latest",
-    "ci": "pnpm run lint && pnpm run knip && pnpm run typecheck && pnpm run test:e2e"
+    "test": "pnpm --filter @shadow/shared test && pnpm --filter @shadow/git-server test",
+    "ci": "pnpm run lint && pnpm run knip && pnpm run typecheck && pnpm run test && pnpm run test:e2e"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]

@@ -1,14 +1,8 @@
 import type { HtmlRenderer } from './htmlRenderer.js';
-import type {
-  HttpMethod,
-  IEngine,
-  IStorage,
-  RequestBody,
-} from './interfaces.js';
+import { ContentTypeHeader, ShadowGitUrlHeader } from './httpHeaders.js';
+import type { IEngine, IStorage } from './interfaces.js';
 import { TemplateBody } from './resource.js';
-import type { IResponse } from './response.js';
-import { ContentType, RedirectLocation, Response } from './response.js';
-import { Surl, type Url } from './url.js';
+import { Surl } from './url.js';
 
 export class Engine implements IEngine {
   private constructor(
@@ -20,29 +14,36 @@ export class Engine implements IEngine {
     return new Engine(storage, renderer);
   }
 
-  async handle(
-    url: Url,
-    method: HttpMethod,
-    body: RequestBody | null,
-  ): Promise<IResponse> {
-    const path = url.toString();
+  async handle(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    const path = url.pathname;
+    const method = request.method.toUpperCase();
 
-    if (path === '/new-resource' && method.isGet()) {
-      return Response.ok(
-        this.renderer.renderNewResource({ errors: [] }),
-        ContentType.HTML,
-      );
+    if (path === '/new-resource' && method === 'GET') {
+      return new Response(this.renderer.renderNewResource({ errors: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      });
     }
 
-    if (path === '/' && method.isPost()) {
-      return this.handlePost(body);
+    if (path === '/' && method === 'POST') {
+      return this.handlePost(request);
     }
 
     return this.handleGet();
   }
 
-  private async handlePost(body: RequestBody | null): Promise<IResponse> {
-    const params = parseFormBody(body);
+  private async handlePost(request: Request): Promise<Response> {
+    const rawContentType = request.headers.get('content-type');
+    const rawShadowGitUrl = request.headers.get('x-shadow-git-url');
+
+    const contentType =
+      rawContentType != null ? ContentTypeHeader.of(rawContentType) : null;
+    const shadowGitUrl =
+      rawShadowGitUrl != null ? ShadowGitUrlHeader.of(rawShadowGitUrl) : null;
+
+    const bodyText = await request.text();
+    const params = parseFormBody(bodyText);
     const errors: string[] = [];
 
     const rawName = params.get('name');
@@ -56,32 +57,34 @@ export class Engine implements IEngine {
     }
 
     if (errors.length > 0) {
-      return Response.badRequest(this.renderer.renderNewResource({ errors }));
+      return new Response(this.renderer.renderNewResource({ errors }), {
+        status: 400,
+        headers: { 'Content-Type': 'text/html; charset=utf-8' },
+      });
     }
 
-    const surl = Surl.of(rawName as string);
+    const surl = Surl.of(rawName as string, contentType, shadowGitUrl);
     const templateBody = TemplateBody.of(rawBody as string);
 
     await this.storage.saveResource(surl, { name: surl, body: templateBody });
 
-    return Response.redirect(RedirectLocation.of('/'));
+    return new Response(null, {
+      status: 303,
+      headers: { Location: '/' },
+    });
   }
 
-  private handleGet(): IResponse {
+  private handleGet(): Response {
     const resources = this.storage.listResources();
-    return Response.ok(
-      this.renderer.renderIndex({ resources }),
-      ContentType.HTML,
-    );
+    return new Response(this.renderer.renderIndex({ resources }), {
+      status: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    });
   }
 }
 
-function parseFormBody(body: RequestBody | null): Map<string, string> {
+function parseFormBody(raw: string): Map<string, string> {
   const map = new Map<string, string>();
-  if (body === null) {
-    return map;
-  }
-  const raw = body.toString();
   for (const pair of raw.split('&')) {
     const eqIdx = pair.indexOf('=');
     if (eqIdx === -1) continue;

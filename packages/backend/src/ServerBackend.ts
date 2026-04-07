@@ -1,6 +1,5 @@
 import http from 'node:http';
 import type { IBackend, IConfig } from '@shadow/shared';
-import { HttpMethod, RequestBody, Url } from '@shadow/shared';
 
 export class ServerBackend implements IBackend {
   private constructor(
@@ -29,23 +28,38 @@ export class ServerBackend implements IBackend {
     res: http.ServerResponse,
   ): Promise<void> {
     const rawUrl = req.url ?? '/';
-    const rawMethod = req.method ?? 'GET';
+    const method = req.method ?? 'GET';
 
-    const url = Url.of(rawUrl);
-    const method = HttpMethod.of(rawMethod);
-
-    const body = method.isPost() ? await readBody(req) : null;
-
-    const response = await this.config.engine.handle(url, method, body);
-
-    res.statusCode = response.status.toNumber();
-    res.setHeader('Content-Type', response.contentType.toString());
-
-    if (response.redirect !== null) {
-      res.setHeader('Location', response.redirect.toString());
+    const headers = new Headers();
+    for (const [key, value] of Object.entries(req.headers)) {
+      if (value == null) continue;
+      if (Array.isArray(value)) {
+        for (const v of value) {
+          headers.append(key, v);
+        }
+      } else {
+        headers.set(key, value);
+      }
     }
 
-    res.end(response.body.toString());
+    const body = method.toUpperCase() === 'POST' ? await readBody(req) : null;
+
+    const request = new Request(`http://localhost${rawUrl}`, {
+      method,
+      headers,
+      body,
+    });
+
+    const response = await this.config.engine.handle(request);
+
+    res.statusCode = response.status;
+
+    for (const [key, value] of response.headers.entries()) {
+      res.setHeader(key, value);
+    }
+
+    const responseBody = await response.text();
+    res.end(responseBody);
   }
 }
 
@@ -64,13 +78,11 @@ export class Port {
   }
 }
 
-async function readBody(req: http.IncomingMessage): Promise<RequestBody> {
+async function readBody(req: http.IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     req.on('data', (chunk: Buffer) => chunks.push(chunk));
-    req.on('end', () =>
-      resolve(RequestBody.of(Buffer.concat(chunks).toString('utf-8'))),
-    );
+    req.on('end', () => resolve(Buffer.concat(chunks).toString('utf-8')));
     req.on('error', reject);
   });
 }
