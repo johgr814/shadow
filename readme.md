@@ -68,36 +68,50 @@ The matter meta-data that is used to define the resource template. Plus schema
 
 ## Internal concepts – Pluggable interfaces making up the application
 
-### router – (IRouter       resolve(url : Url) : IResource)
+### router – (IRouter       resolve(url : Url) : IContent)
 Takes an external url 'stripped from root context' and returns either a json-body with a representation of the 'resource-tree' like collection or a template. Or an actual resource.
 
 ### internal-router - (IInternalRouter    resolve(url: Surl) : IProducer<TData>)
 Takes an internal surl and returns a
 
-### loader - (ILoader    load(producer: IProducer) : data : Array<TData>)
-Takes an IProducer and returns an array of data.
+### validator - (|Validator
+validateResource(url: Surl, def : IResource) : void
+validateProducer(url: Surl, def : IProducer) : void
+validateData(data: Surl, item : Object) : void
+ 
 
-### persister - (IPersister
-persist(url: Surl, def : IResource) : void
-persist(url: Surl, def : IProducer) : void
-persist(data: Surl, item : Object) : void
+### store – IStore
+Facade for isomorphic-git, should be kept generic so that it can be used with other storage solutions.
 
-Persist 
+query(surl: Surl) : IContent
+saveResource(url: Surl, def : IResource) : void
+saveProducer(url: Surl, def : IProducer) : void
+saveData(data: Surl, item : Object) : void
 
-### engine - IEngine (url: Url) : IRenderedTemplateOutput
+### engine - IEngine (url: Url) : Response
 Takes an external url and strips it from the root context.
-Calls the router and gets the resource.
-Examines resource meta-data.
-Iterates over sources in resource meta-data.
-    — Calls internal-router on each source.
-    — Calls loader on with each producer.
+Calls the router and gets the IContent. If it is an IProducer, it follows the sources, recursevliy.
+Returns a response object with the content, either a json-body representing the strucutre, as a folder or template or if list of them. If a reource then the result of the resource.
 
 Then executes the template passing data from sources and returns the result.
 
-### server - IServer(config : IConfig)
-IServer 
+### backend - IBackend(config : IConfig)
+IBackend 
     - method for accepting requests
     - Should be instantiated with a config object.
+
+### server backend
+ServerBackend – a backend that listens on a port and accepts requests (standard way doing stuff) immediately passes it on to the engine.
+ServerBackend will be the only component that resides in backend folder.
+
+### client backend
+ClientBackend – client backend is a way of 'emulating' a server backend, but is there for production use. When included on index.html it will create it
+1. create an iframe that spans the entire screen. it will be used for rendering the application.
+2. serve same static files as the server backend.
+3. Add event listeners to the all forms on the page.
+4. Prevent default behavior of the buttons and instead post events to the iframe window. 
+5. Events will be in the form of real http requests. Using real request object.
+6. Receives event inside ifram and passes it on to the engine immediately.
 
 ### config - IConfig
 IConfig - a config contains instances of router, internal-router, loader and engine. Making up the application.

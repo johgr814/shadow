@@ -1,0 +1,2 @@
+# Layers
+This project is special and layers have no meaning here. Almost everything is regarded as domain. Only implementatin of IPersister is regarded transport. Hence those words will not be used for any folders. 

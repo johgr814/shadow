@@ -38,16 +38,23 @@ Worspaces and pnpm should be introduced to that that all components becomes pack
 User surfs to index page, since the installation is empty he will be prompted to create a colletion or resource. User chooses to create a resource. App provides a template editor and when user presses save stores the template. User is redirected back to index.html that now shows a list of resources with the newly created item. 
 
 ### Implementation details:
-Index pages pass the "/" route to server.ts. Server.ts calls router for the route("/") and so on. A 200 response is sent back. UI then shows available actons to the user.
-User click on "Create new resource" and the app navigates to the new resource page. This is full page redirect. No state is maintained. Post action in new resource page will post to "current location"
+Index pages pass the "/" route to ServerBackend.ts. ServerBackend.ts calls directly calls engine.ts that calls router for the route("/") and so on. A 200 response is sent back. UI then shows available actons to the user.
+User click on "Create new resource" and the app navigates to the new resource page (new-resource.html). This is full page redirect. No state is maintained. Post action in new resource page will post to "realtive current path" only "/" in this case. 
 User fills in the template in the template editor. 
-User click on "Save " the payload is sent to the server via normal http form/post.
+User click on "Save " the payload is sent to the backend via normal http form/post.
 Create collection is not implemented in this use case.
-Server.ts calls router and since it is a post persister will be called. Persister uses ismorphic-git to store the template in a the local instance folder.
-A target for starting the app shuold be added to package.json. It should create a new folder 'instance'. The app will then be configured to use this local folder as initial storage with isomorphic-git.
-domain folder should be dropped. It will instead contain packages that can be reused between backend and frontend.
-server.ts will be first file to live in frontend folder. Since it's logic will special to act as a frontend server.
-
+Engine.ts calls router and since it is a post storage will be called. Storage uses ismorphic-git to store the template in a the local instance folder.
+A target for starting the app shuold be added to package.json. 
+It should create a new folder 'instances' if it is not already there. A sub folder called e2e should be created. It should be initialized as a git repo for use by isomorphic-git. It should be deleted and recreated before each test run.
+The app will then be configured to use this local folder as initial storage with isomorphic-git.
+Domain folder in shared should be deleted and the code thats inside it as well. They were only used for testing setup.
+Existing test-cases should be deleted as they are obsolete by this use case.
+main.ts should be deleted.
+title.ts should be deleted.
+ServerBackend.ts will be the only component inside the backend folder right now. 
+For this scenario all js code should be executed backend-side. But be kept in shared folder, since next task will be making the client backend.
+Interaction wih git server will be done via storage.ts code in shared folder as earlier stated
+Linting and formatting is working and applies to all code as well as test code - test should be included
 ###
 a e2e test file for named 'resource.create' should be run as use case 1 stipulates.
 
