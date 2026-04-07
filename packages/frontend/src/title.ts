@@ -1,7 +1,7 @@
 import {
   createApplicationName,
   getApplicationNameValue,
-} from '../shared/domain/applicationName';
+} from '@shadow/shared/domain/applicationName';
 
 export const getApplicationTitle = (): string => {
   const applicationName = createApplicationName('Shadow');

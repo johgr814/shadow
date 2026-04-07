@@ -1,6 +1,6 @@
+import { createApplicationName } from '@shadow/shared/domain/applicationName';
 import { describe, expect, it } from 'vitest';
-import { getApplicationTitle } from '../../src/frontend/title';
-import { createApplicationName } from '../../src/shared/domain/applicationName';
+import { getApplicationTitle } from '../../src/title';
 
 describe('getApplicationTitle', () => {
   it('returns expected application title', () => {

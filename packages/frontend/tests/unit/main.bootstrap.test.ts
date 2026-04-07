@@ -9,14 +9,14 @@ describe('frontend bootstrap', () => {
   it('sets app title in DOM when #app-title exists', async () => {
     document.body.innerHTML = '<h1 id="app-title"></h1>';
 
-    await import('../../src/frontend/main');
+    await import('../../src/main');
 
     const titleElement = document.querySelector('#app-title');
     expect(titleElement?.textContent).toBe('Shadow Configuration Server');
   });
 
   it('throws when #app-title element is missing', async () => {
-    await expect(import('../../src/frontend/main')).rejects.toThrow(
+    await expect(import('../../src/main')).rejects.toThrow(
       'Missing #app-title element in document.',
     );
   });

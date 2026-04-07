@@ -1,6 +1,6 @@
 ## Milestone 1 setup
 
-1. Read your general guidelines bootstrap
+1. Read your general .junie/guidelines.md
 2. Read readme file
 3. This project will be a mix backend frontend project.
 4. Initially we start with only frontend and running the solution in frontend mode.
@@ -29,8 +29,31 @@
 3. Make sure all configs have schemas available where applicable
 4. commit and push your changes.
 
+## Milestone 2 setup
+Worspaces and pnpm should be introduced to that that all components becomes packages in shared folder.
 
-## Milestone 2
-1. Read your general guidelines bootstrap
-2. Read readme file
-3. create engine.ts it should be working from 
+
+## Use case 1, create a resource
+### Scenario:
+User surfs to index page, since the installation is empty he will be prompted to create a colletion or resource. User chooses to create a resource. App provides a template editor and when user presses save stores the template. User is redirected back to index.html that now shows a list of resources with the newly created item. 
+
+### Implementation details:
+Index pages pass the "/" route to server.ts. Server.ts calls router for the route("/") and so on. A 200 response is sent back. UI then shows available actons to the user.
+User click on "Create new resource" and the app navigates to the new resource page. This is full page redirect. No state is maintained. Post action in new resource page will post to "current location"
+User fills in the template in the template editor. 
+User click on "Save " the payload is sent to the server via normal http form/post.
+Create collection is not implemented in this use case.
+Server.ts calls router and since it is a post persister will be called. Persister uses ismorphic-git to store the template in a the local instance folder.
+A target for starting the app shuold be added to package.json. It should create a new folder 'instance'. The app will then be configured to use this local folder as initial storage with isomorphic-git.
+domain folder should be dropped. It will instead contain packages that can be reused between backend and frontend.
+server.ts will be first file to live in frontend folder. Since it's logic will special to act as a frontend server.
+
+###
+a e2e test file for named 'resource.create' should be run as use case 1 stipulates.
+
+
+
+
+
+
+

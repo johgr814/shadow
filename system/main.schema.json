@@ -3,18 +3,6 @@
   "$id": "https://shadow.thruput.se/schemas/main.schema.json",
   "title": "Shadow - Main schema",
   "$defs": {
-    "Name": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 256,
-      "description": "A human-readable display name"
-    },
-    "Concept": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 128,
-      "description": "A branded string identifying a concept in the resource tree"
-    },
     "Slug": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
@@ -24,4 +12,3 @@
     }
   }
 }
-

@@ -18,7 +18,9 @@ TypeScript and node are chosen, so that a server is not required to edit and vie
 Mustache is choosen as template language since it available on so many platforms and have a clear boundry of being logic-less.
 gray-matter - for getting metadata from mustache templates
 Json-Schema will be used to express the framework as well as the resoueces it holds.
-Frontend will be build vith a minimum of vanilla js. Front-end will be "pure HTML" as much as possible. All markup will be minimalistic and semanticly correct. Pico css class-less for styling.  
+Frontend will be build vith a minimum of vanilla js. Front-end will be "pure HTML" as much as possible. All markup will be minimalistic and semanticly correct. Pico css class-less for styling.
+isomorphic-git lib will be used as abstraction for storage
+CodeMirror 6 will be used for editing resources.
 
 # Architecture
 
@@ -28,8 +30,10 @@ Conceptually, the app will be a route-based resource tree. Collections will make
 
 ## Concepts for user of shadow
 ### instance
-One 'installation' of this project. Will in future be backed by git repo.
-The instance is a collection of templates and collections.
+One 'installation' of this project. Essentially a git repo containing definitions of producers and resources
+
+### content - IContent
+Base interface for both producers, resources. 
 
 ### surl
 A short internal url that can be used to reference producers
@@ -46,16 +50,17 @@ Represents materialized data in this project.
 A collection has everything that a producer has plus
 (sources.json is in this case informational only for a future state where the collection will be implemented)
 - data.json contains, has an array where each item is an instance of the entity described in the schema.json
+- OR subfolders where each subfolder is an instance of the entity described in the schema.json in this case schema can onnly be a string mapping to the folder name.
 
 ### reference – IReference (subclass of producer)
 Is a producer of data that fetches it from data from the outside of this instance.
 A reference has everything that a producer has plus a reference.ts exporting an instance of the IReference 
 interface.
 
-### resource :IResource
+### resource - IResource
 An output of an template that you can reach via the resource tree
  
-### resource template
+### resource template - IResourceTemplate
 A template that defines the output of a resource together with matter meta-data data
 
 ### resource meta-data
@@ -63,16 +68,23 @@ The matter meta-data that is used to define the resource template. Plus schema
 
 ## Internal concepts – Pluggable interfaces making up the application
 
-### router – (IExternalRouter       resolve(url : Url) : IResource)
-Takes an external url 'stripped from root context' and returns a resource.
+### router – (IRouter       resolve(url : Url) : IResource)
+Takes an external url 'stripped from root context' and returns either a json-body with a representation of the 'resource-tree' like collection or a template. Or an actual resource.
 
 ### internal-router - (IInternalRouter    resolve(url: Surl) : IProducer<TData>)
-Takes an internal surl and returns a producer.
+Takes an internal surl and returns a
 
-## loader - (ILoader    load(producer: IProducer) : data : Array<TData>)
+### loader - (ILoader    load(producer: IProducer) : data : Array<TData>)
 Takes an IProducer and returns an array of data.
 
-## engine - IEngine (url: Url) : IRenderedTemplateOutput
+### persister - (IPersister
+persist(url: Surl, def : IResource) : void
+persist(url: Surl, def : IProducer) : void
+persist(data: Surl, item : Object) : void
+
+Persist 
+
+### engine - IEngine (url: Url) : IRenderedTemplateOutput
 Takes an external url and strips it from the root context.
 Calls the router and gets the resource.
 Examines resource meta-data.
@@ -82,17 +94,16 @@ Iterates over sources in resource meta-data.
 
 Then executes the template passing data from sources and returns the result.
 
-# server - IServer(config : IConfig)
+### server - IServer(config : IConfig)
 IServer 
     - method for accepting requests
     - Should be instantiated with a config object.
 
-# config - IConfig
+### config - IConfig
 IConfig - a config contains instances of router, internal-router, loader and engine. Making up the application.
 
-
-
-
+### system collections
+There will be a few system collections that are always available, hard-coded in the application.
 
 
 
