@@ -31,33 +31,43 @@ function ensureInstancesDir(): void {
   fs.mkdirSync(INSTANCES_DIR, { recursive: true });
 }
 
+export function handleGitRequest(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+): void {
+  const gunzip = zlib.createGunzip();
+  gunzip.on('error', () => {
+    res.statusCode = 400;
+    res.end('Bad gzip encoding');
+  });
+  const reqStream =
+    req.headers['content-encoding'] === 'gzip' ? req.pipe(gunzip) : req;
+
+  reqStream
+    .pipe(
+      new backend(req.url ?? '/', (err: unknown, service: GitService) => {
+        if (err != null) {
+          res.statusCode = 500;
+          res.end(String(err));
+          return;
+        }
+
+        res.setHeader('content-type', service.type);
+
+        const ps = spawn(service.cmd, [...service.args, INSTANCES_DIR]);
+        ps.stdout.pipe(service.createStream()).pipe(ps.stdin);
+      }),
+    )
+    .pipe(res);
+}
+
 function startServerIfNeeded(): void {
   if (server !== null) {
     return;
   }
 
   server = http.createServer((req, res) => {
-    const reqStream =
-      req.headers['content-encoding'] === 'gzip'
-        ? req.pipe(zlib.createGunzip())
-        : req;
-
-    reqStream
-      .pipe(
-        new backend(req.url ?? '/', (err: unknown, service: GitService) => {
-          if (err != null) {
-            res.statusCode = 500;
-            res.end(String(err));
-            return;
-          }
-
-          res.setHeader('content-type', service.type);
-
-          const ps = spawn(service.cmd, [...service.args, INSTANCES_DIR]);
-          ps.stdout.pipe(service.createStream()).pipe(ps.stdin);
-        }),
-      )
-      .pipe(res);
+    handleGitRequest(req, res);
   });
 
   server.on('error', (err: NodeJS.ErrnoException) => {

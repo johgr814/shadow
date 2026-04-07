@@ -9,8 +9,10 @@ export type {
   IEngine,
   IBackend,
   IConfig,
+  IHtmlRenderer,
   IResourceList,
 } from './interfaces.js';
+export { RenderedHtml } from './renderedHtml.js';
 export { GitStorage } from './storage.js';
 export { Router } from './router.js';
 export { Engine } from './engine.js';

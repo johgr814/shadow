@@ -89,6 +89,57 @@ describe('Package dependency rules', () => {
   });
 });
 
+describe('Cross-package import rules', () => {
+  const SHARED_CONCRETE_EXPORTS = [
+    'GitStorage',
+    'Router',
+    'Engine',
+    'HtmlRenderer',
+    'TemplateBody',
+    'Url',
+    'Surl',
+    'ContentTypeHeader',
+    'ShadowGitUrlHeader',
+  ];
+
+  function concreteImportsFromShared(
+    pkg: string,
+    excludeFile?: string,
+  ): string[] {
+    const project = projectFor(pkg);
+    const violations: string[] = [];
+    for (const file of project.getSourceFiles()) {
+      const filePath = file.getFilePath();
+      if (excludeFile != null && filePath.endsWith(excludeFile)) continue;
+      for (const decl of file.getImportDeclarations()) {
+        if (!decl.getModuleSpecifierValue().includes('@shadow/shared'))
+          continue;
+        if (decl.isTypeOnly()) continue;
+        for (const named of decl.getNamedImports()) {
+          if (named.isTypeOnly()) continue;
+          const name = named.getName();
+          if (SHARED_CONCRETE_EXPORTS.includes(name)) {
+            violations.push(
+              `${file.getBaseName()}: imports concrete '${name}' from @shadow/shared`,
+            );
+          }
+        }
+      }
+    }
+    return violations;
+  }
+
+  it('backend (except main.ts) must only import interfaces from @shadow/shared', () => {
+    const violations = concreteImportsFromShared('backend', '/main.ts');
+    expect(violations).toEqual([]);
+  });
+
+  it('e2e must only import interfaces from @shadow/shared', () => {
+    const violations = concreteImportsFromShared('e2e');
+    expect(violations).toEqual([]);
+  });
+});
+
 describe('Domain modeling rules', () => {
   it('interfaces in shared must not expose primitive types in method signatures', () => {
     const project = projectFor('shared');

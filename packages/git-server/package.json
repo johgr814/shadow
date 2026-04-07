@@ -9,7 +9,7 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --coverage"
   },
   "dependencies": {
     "git-http-backend": "^1.1.2",
@@ -18,6 +18,7 @@
   "devDependencies": {
     "@types/git-http-backend": "^1.0.4",
     "@types/node": "^24.7.2",
+    "@vitest/coverage-v8": "^4.1.2",
     "typescript": "^5.9.3",
     "vitest": "^4.1.2"
   }

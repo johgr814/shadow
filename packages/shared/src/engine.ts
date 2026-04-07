@@ -1,16 +1,15 @@
-import type { HtmlRenderer } from './htmlRenderer.js';
 import { ContentTypeHeader, ShadowGitUrlHeader } from './httpHeaders.js';
-import type { IEngine, IStorage } from './interfaces.js';
+import type { IEngine, IHtmlRenderer, IStorage } from './interfaces.js';
 import { TemplateBody } from './resource.js';
 import { Surl } from './url.js';
 
 export class Engine implements IEngine {
   private constructor(
     private readonly storage: IStorage,
-    private readonly renderer: HtmlRenderer,
+    private readonly renderer: IHtmlRenderer,
   ) {}
 
-  static of(storage: IStorage, renderer: HtmlRenderer): Engine {
+  static of(storage: IStorage, renderer: IHtmlRenderer): Engine {
     return new Engine(storage, renderer);
   }
 
@@ -20,10 +19,13 @@ export class Engine implements IEngine {
     const method = request.method.toUpperCase();
 
     if (path === '/new-resource' && method === 'GET') {
-      return new Response(this.renderer.renderNewResource({ errors: [] }), {
-        status: 200,
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-      });
+      return new Response(
+        this.renderer.renderNewResource({ errors: [] }).toString(),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        },
+      );
     }
 
     if (path === '/' && method === 'POST') {
@@ -57,10 +59,13 @@ export class Engine implements IEngine {
     }
 
     if (errors.length > 0) {
-      return new Response(this.renderer.renderNewResource({ errors }), {
-        status: 400,
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-      });
+      return new Response(
+        this.renderer.renderNewResource({ errors }).toString(),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'text/html; charset=utf-8' },
+        },
+      );
     }
 
     const surl = Surl.of(rawName as string, contentType, shadowGitUrl);
@@ -76,7 +81,7 @@ export class Engine implements IEngine {
 
   private handleGet(): Response {
     const resources = this.storage.listResources();
-    return new Response(this.renderer.renderIndex({ resources }), {
+    return new Response(this.renderer.renderIndex({ resources }).toString(), {
       status: 200,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });

@@ -2,10 +2,12 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    pool: 'forks',
+    sequence: { concurrent: false },
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],
-      exclude: ['src/index.ts', 'src/interfaces.ts', 'src/content.ts'],
+      exclude: ['src/index.ts'],
       thresholds: {
         lines: 80,
         functions: 80,

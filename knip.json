@@ -15,6 +15,9 @@
     },
     "packages/git-server": {
       "project": ["src/**/*.ts", "tests/**/*.ts"]
+    },
+    "packages/arch-test": {
+      "project": ["tests/**/*.ts"]
     }
   }
 }

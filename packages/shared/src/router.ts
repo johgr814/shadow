@@ -1,13 +1,12 @@
 import type { IContent } from './content.js';
-import type { IRouter } from './interfaces.js';
-import type { GitStorage } from './storage.js';
+import type { IRouter, IStorage } from './interfaces.js';
 import type { Url } from './url.js';
 import { Surl } from './url.js';
 
 export class Router implements IRouter {
-  private constructor(private readonly storage: GitStorage) {}
+  private constructor(private readonly storage: IStorage) {}
 
-  static of(storage: GitStorage): Router {
+  static of(storage: IStorage): Router {
     return new Router(storage);
   }
 

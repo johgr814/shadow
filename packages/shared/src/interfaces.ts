@@ -1,4 +1,5 @@
 import type { IContent } from './content.js';
+import type { RenderedHtml } from './renderedHtml.js';
 import type { IResource, IResourceTemplate } from './resource.js';
 import type { Surl, Url } from './url.js';
 
@@ -18,6 +19,15 @@ export interface IEngine {
 
 export interface IBackend {
   start(): Promise<void>;
+}
+
+export interface IHtmlRenderer {
+  renderIndex(viewModel: {
+    readonly resources: ReadonlyArray<string>;
+  }): RenderedHtml;
+  renderNewResource(viewModel: {
+    readonly errors: ReadonlyArray<string>;
+  }): RenderedHtml;
 }
 
 export interface IConfig {
