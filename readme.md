@@ -21,6 +21,7 @@ Json-Schema will be used to express the framework as well as the resoueces it ho
 Frontend will be build vith a minimum of vanilla js. Front-end will be "pure HTML" as much as possible. All markup will be minimalistic and semanticly correct. Pico css class-less for styling.
 isomorphic-git lib will be used as abstraction for storage
 CodeMirror 6 will be used for editing resources.
+ejs - for UI rendering templates
 
 # Architecture
 
@@ -88,9 +89,14 @@ saveResource(url: Surl, def : IResource) : void
 saveProducer(url: Surl, def : IProducer) : void
 saveData(data: Surl, item : Object) : void
 
+
+### htmlRenderer
+Abstraction on top of ejs. HAve methods for each type of content.
+
 ### engine - IEngine (url: Url) : Response
 Takes an external url and strips it from the root context.
-Calls the router and gets the IContent. If it is an IProducer, it follows the sources, recursevliy.
+Calls the router and gets the IContent. If it is an IProducer or IResource, it follows the sources, recursevliy.
+In case of resource a Response with defined MIME-type is returned. In case of structural content htmllRenderer is used.
 Returns a response object with the content, either a json-body representing the strucutre, as a folder or template or if list of them. If a reource then the result of the resource.
 
 Then executes the template passing data from sources and returns the result.
@@ -111,7 +117,7 @@ ClientBackend – client backend is a way of 'emulating' a server backend, but i
 3. Add event listeners to the all forms on the page.
 4. Prevent default behavior of the buttons and instead post events to the iframe window. 
 5. Events will be in the form of real http requests. Using real request object.
-6. Receives event inside ifram and passes it on to the engine immediately.
+6. Receives event inside iframe and passes it on to the engine immediately.
 
 ### config - IConfig
 IConfig - a config contains instances of router, internal-router, loader and engine. Making up the application.

@@ -41,6 +41,10 @@ User surfs to index page, since the installation is empty he will be prompted to
 Index pages pass the "/" route to ServerBackend.ts. ServerBackend.ts calls directly calls engine.ts that calls router for the route("/") and so on. A 200 response is sent back. UI then shows available actons to the user.
 User click on "Create new resource" and the app navigates to the new resource page (new-resource.html). This is full page redirect. No state is maintained. Post action in new resource page will post to "realtive current path" only "/" in this case. 
 User fills in the template in the template editor. 
+####
+new-resource.html
+Consists of third party template editor. And an html for that can submit the template. Template is posted as a IResourceTemplate. 
+
 User click on "Save " the payload is sent to the backend via normal http form/post.
 Create collection is not implemented in this use case.
 Engine.ts calls router and since it is a post storage will be called. Storage uses ismorphic-git to store the template in a the local instance folder.
