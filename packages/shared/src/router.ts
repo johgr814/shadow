@@ -1,16 +1,14 @@
 import type { IContent } from './content.js';
-import type { IRouter } from './interfaces.js';
-import { Surl } from './surl.js';
-import type { Url } from './url.js';
+import type { IRouter, IStorage } from './interfaces.js';
 
 export class Router implements IRouter {
-  private constructor() {}
+  private constructor(private readonly storage: IStorage) {}
 
-  static of(): Router {
-    return new Router();
+  static of(storage: IStorage): Router {
+    return new Router(storage);
   }
 
-  resolve(url: Url): IContent {
-    return { surl: Surl.fromUrl(url) };
+  resolve(request: Request): IContent {
+    return { surl: this.storage.surlFromRequest(request) };
   }
 }

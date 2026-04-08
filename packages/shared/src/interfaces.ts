@@ -1,18 +1,24 @@
 import type { IContent } from './content.js';
+import type { FileName } from './fileName.js';
 import type { GitServerUrl } from './gitServerUrl.js';
 import type { RenderedHtml } from './renderedHtml.js';
 import type { IResource, IResourceTemplate } from './resource.js';
-import type { Surl } from './surl.js';
 import type { Url } from './url.js';
 
+export interface ISurl {
+  readonly _brand?: never;
+}
+
 export interface IRouter {
-  resolve(url: Url): IContent;
+  resolve(request: Request): IContent;
 }
 
 export interface IStorage {
   readonly remoteUrl: GitServerUrl;
-  query(surl: Surl): IContent;
-  saveResource(surl: Surl, def: IResourceTemplate): Promise<void>;
+  surlFromRequest(request: Request): ISurl;
+  surlFromFileName(fileName: FileName, url: Url): ISurl;
+  query(surl: ISurl): IContent;
+  saveResource(surl: ISurl, def: IResourceTemplate): Promise<void>;
   listResources(): ReadonlyArray<string>;
 }
 

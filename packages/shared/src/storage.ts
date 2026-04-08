@@ -1,12 +1,36 @@
 import git from 'isomorphic-git';
 import { Volume, createFsFromVolume } from 'memfs';
 import type { IContent } from './content.js';
+import type { FileName } from './fileName.js';
 import { GitServerUrl } from './gitServerUrl.js';
-import type { IStorage } from './interfaces.js';
+import { ContentTypeHeader, ShadowGitUrlHeader } from './httpHeaders.js';
+import type { IStorage, ISurl } from './interfaces.js';
 import type { IResourceTemplate } from './resource.js';
-import type { Surl } from './surl.js';
+import type { Url } from './url.js';
 
 const DIR = '/';
+
+class GitSurl implements ISurl {
+  readonly _brand?: never;
+
+  private constructor(
+    private readonly value: string,
+    readonly contentType: ContentTypeHeader | null,
+    readonly shadowGitUrl: ShadowGitUrlHeader | null,
+  ) {}
+
+  static _create(
+    value: string,
+    contentType: ContentTypeHeader | null,
+    shadowGitUrl: ShadowGitUrlHeader | null,
+  ): GitSurl {
+    return new GitSurl(value, contentType, shadowGitUrl);
+  }
+
+  toString(): string {
+    return this.value;
+  }
+}
 
 export class GitStorage implements IStorage {
   private readonly vol: InstanceType<typeof Volume>;
@@ -27,11 +51,34 @@ export class GitStorage implements IStorage {
     return new GitStorage(GitServerUrl.of(remoteUrl));
   }
 
-  query(_surl: Surl): IContent {
+  surlFromRequest(request: Request): ISurl {
+    const url = new URL(request.url);
+    const value = url.pathname;
+    if (!value || value.trim().length === 0) {
+      throw new Error('GitSurl: url pathname must not be empty');
+    }
+    const rawContentType = request.headers.get('content-type');
+    const rawShadowGitUrl = request.headers.get('x-shadow-git-url');
+    return GitSurl._create(
+      value,
+      rawContentType ? ContentTypeHeader.of(rawContentType) : null,
+      rawShadowGitUrl ? ShadowGitUrlHeader.of(rawShadowGitUrl) : null,
+    );
+  }
+
+  surlFromFileName(fileName: FileName, url: Url): ISurl {
+    return GitSurl._create(
+      fileName.toString(),
+      url.contentType,
+      url.shadowGitUrl,
+    );
+  }
+
+  query(_surl: ISurl): IContent {
     return { surl: _surl };
   }
 
-  async saveResource(surl: Surl, def: IResourceTemplate): Promise<void> {
+  async saveResource(surl: ISurl, def: IResourceTemplate): Promise<void> {
     await this.initPromise;
     const filename = `${surl.toString()}.mustache`;
     this.memFs.writeFileSync(`${DIR}/${filename}`, def.body.toString(), {

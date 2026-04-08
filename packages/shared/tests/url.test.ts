@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { FileName } from '../src/fileName.js';
 import { ContentTypeHeader, ShadowGitUrlHeader } from '../src/httpHeaders.js';
-import { Surl } from '../src/surl.js';
+import { GitStorage } from '../src/storage.js';
 import { Url } from '../src/url.js';
+
+const storage = GitStorage.of('http://localhost:7000/instances');
 
 describe('Url', () => {
   it('wraps a valid basePath and path with null headers', () => {
@@ -49,54 +51,36 @@ describe('Url', () => {
   });
 });
 
-describe('Surl.fromUrl', () => {
-  it('creates surl from url pathname with null headers', () => {
-    const url = Url.of('http://localhost:3000', '/my-resource', null, null);
-    const surl = Surl.fromUrl(url);
+describe('GitStorage.surlFromRequest', () => {
+  it('creates surl from request url pathname', () => {
+    const request = new Request('http://localhost:3000/my-resource');
+    const surl = storage.surlFromRequest(request);
     expect(surl.toString()).toBe('/my-resource');
-    expect(surl.contentType).toBeNull();
-    expect(surl.shadowGitUrl).toBeNull();
   });
 
-  it('carries Content-Type header from url', () => {
-    const ct = ContentTypeHeader.of('text/plain');
-    const url = Url.of('http://localhost:3000', '/my-resource', ct, null);
-    const surl = Surl.fromUrl(url);
-    expect(surl.contentType?.toString()).toBe('text/plain');
+  it('creates surl with root pathname', () => {
+    const request = new Request('http://localhost:3000/');
+    expect(storage.surlFromRequest(request).toString()).toBe('/');
   });
 
-  it('carries X-Shadow-Git-URL header from url', () => {
-    const gitUrl = ShadowGitUrlHeader.of('https://github.com/org/repo');
-    const url = Url.of('http://localhost:3000', '/my-resource', null, gitUrl);
-    const surl = Surl.fromUrl(url);
-    expect(surl.shadowGitUrl?.toString()).toBe('https://github.com/org/repo');
+  it('extracts content-type header from request', () => {
+    const request = new Request('http://localhost:3000/foo', {
+      headers: {
+        'content-type': 'text/html',
+        'x-shadow-git-url': 'http://localhost:7000/instances',
+      },
+    });
+    const surl = storage.surlFromRequest(request);
+    expect(surl.toString()).toBe('/foo');
   });
 });
 
-describe('Surl.fromFileName', () => {
-  it('creates surl from fileName with null headers', () => {
+describe('GitStorage.surlFromFileName', () => {
+  it('creates surl from fileName', () => {
     const fileName = FileName.of('my-config');
     const url = Url.of('http://localhost:3000', '/', null, null);
-    const surl = Surl.NewResourceUrl(fileName, url);
+    const surl = storage.surlFromFileName(fileName, url);
     expect(surl.toString()).toBe('my-config');
-    expect(surl.contentType).toBeNull();
-    expect(surl.shadowGitUrl).toBeNull();
-  });
-
-  it('carries Content-Type header from url', () => {
-    const ct = ContentTypeHeader.of('application/json');
-    const fileName = FileName.of('my-config');
-    const url = Url.of('http://localhost:3000', '/', ct, null);
-    const surl = Surl.NewResourceUrl(fileName, url);
-    expect(surl.contentType?.toString()).toBe('application/json');
-  });
-
-  it('carries X-Shadow-Git-URL header from url', () => {
-    const gitUrl = ShadowGitUrlHeader.of('https://github.com/org/repo');
-    const fileName = FileName.of('my-config');
-    const url = Url.of('http://localhost:3000', '/', null, gitUrl);
-    const surl = Surl.NewResourceUrl(fileName, url);
-    expect(surl.shadowGitUrl?.toString()).toBe('https://github.com/org/repo');
   });
 });
 

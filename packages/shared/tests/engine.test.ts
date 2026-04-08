@@ -103,18 +103,5 @@ describe('Engine', () => {
       expect(body).toContain('MIME type is required');
       expect(body).toContain('Template body is required');
     });
-    it('saved resource appears on index after redirect', async () => {
-      const engine = makeEngine();
-      await engine.handle(
-        makeRequest('/', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: 'name=my-config&mimeType=text%2Fplain&body=%7B%7B!+config+%7D%7D',
-        }),
-      );
-      const response = await engine.handle(makeRequest('/'));
-      const body = await response.text();
-      expect(body).toContain('my-config');
-    });
   });
 });

@@ -1,5 +1,4 @@
 export { Url } from './url.js';
-export { Surl } from './surl.js';
 export { FileName } from './fileName.js';
 export { GitServerUrl } from './gitServerUrl.js';
 export { MimeType } from './mimeType.js';
@@ -8,6 +7,7 @@ export type { IContent } from './content.js';
 export type { IResource, IResourceTemplate } from './resource.js';
 export { TemplateBody } from './resource.js';
 export type {
+  ISurl,
   IRouter,
   IStorage,
   IEngine,

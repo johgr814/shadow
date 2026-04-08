@@ -97,7 +97,6 @@ describe('Cross-package import rules', () => {
     'HtmlRenderer',
     'TemplateBody',
     'Url',
-    'Surl',
     'FileName',
     'MimeType',
     'ContentTypeHeader',

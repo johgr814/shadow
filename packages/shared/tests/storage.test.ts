@@ -3,7 +3,6 @@ import { FileName } from '../src/fileName.js';
 import { MimeType } from '../src/mimeType.js';
 import { TemplateBody } from '../src/resource.js';
 import { GitStorage } from '../src/storage.js';
-import { Surl } from '../src/surl.js';
 import { Url } from '../src/url.js';
 
 const REMOTE_URL = 'http://localhost:7000/e2e';
@@ -13,8 +12,8 @@ function fileNameFor(name: string): FileName {
   return FileName.of(name);
 }
 
-function surlFor(name: string): Surl {
-  return Surl.NewResourceUrl(
+function surlFor(storage: GitStorage, name: string) {
+  return storage.surlFromFileName(
     FileName.of(name),
     Url.of(BASE_URL, '/', null, null),
   );
@@ -37,7 +36,7 @@ describe('GitStorage', () => {
 
   it('saves a resource and lists it', async () => {
     const storage = GitStorage.of(REMOTE_URL);
-    const surl = surlFor('my-template');
+    const surl = surlFor(storage, 'my-template');
     await storage.saveResource(surl, {
       fileName: fileNameFor('my-template'),
       mimeType: MimeType.of('text/plain'),
@@ -48,12 +47,12 @@ describe('GitStorage', () => {
 
   it('saves multiple resources and lists all', async () => {
     const storage = GitStorage.of(REMOTE_URL);
-    await storage.saveResource(surlFor('template-a'), {
+    await storage.saveResource(surlFor(storage, 'template-a'), {
       fileName: fileNameFor('template-a'),
       mimeType: MimeType.of('text/plain'),
       body: TemplateBody.of('A'),
     });
-    await storage.saveResource(surlFor('template-b'), {
+    await storage.saveResource(surlFor(storage, 'template-b'), {
       fileName: fileNameFor('template-b'),
       mimeType: MimeType.of('text/plain'),
       body: TemplateBody.of('B'),
@@ -65,7 +64,7 @@ describe('GitStorage', () => {
 
   it('query returns content with the given surl', () => {
     const storage = GitStorage.of(REMOTE_URL);
-    const surl = surlFor('some-resource');
+    const surl = surlFor(storage, 'some-resource');
     const content = storage.query(surl);
     expect(content.surl.toString()).toBe('some-resource');
   });
@@ -73,7 +72,7 @@ describe('GitStorage', () => {
   it('two instances are fully isolated', async () => {
     const storage1 = GitStorage.of(REMOTE_URL);
     const storage2 = GitStorage.of(REMOTE_URL);
-    await storage1.saveResource(surlFor('only-in-1'), {
+    await storage1.saveResource(surlFor(storage1, 'only-in-1'), {
       fileName: fileNameFor('only-in-1'),
       mimeType: MimeType.of('text/plain'),
       body: TemplateBody.of('X'),

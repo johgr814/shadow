@@ -1,11 +1,18 @@
-import { Engine, GitServerUrl, HtmlRenderer, Router } from '@shadow/shared';
+import {
+  Engine,
+  GitServerUrl,
+  GitStorage,
+  HtmlRenderer,
+  Router,
+} from '@shadow/shared';
 import type { IConfig } from '@shadow/shared';
 import { Port, ServerBackend } from './ServerBackend.js';
 
 const renderer = new HtmlRenderer();
-const router = Router.of();
-const engine = Engine.of(renderer);
 const gitServerUrl = GitServerUrl.of('http://localhost:7000/instances');
+const storage = GitStorage.of(gitServerUrl.toString());
+const router = Router.of(storage);
+const engine = Engine.of(renderer);
 const config: IConfig = { router, engine, gitServerUrl };
 const port = Port.of(3000);
 const backend = ServerBackend.of(config, port);

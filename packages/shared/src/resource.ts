@@ -1,10 +1,10 @@
 import type { IContent } from './content.js';
 import type { FileName } from './fileName.js';
+import type { ISurl } from './interfaces.js';
 import type { MimeType } from './mimeType.js';
-import type { Surl } from './surl.js';
 
 export interface IResource extends IContent {
-  readonly name: Surl;
+  readonly name: ISurl;
 }
 
 export interface IResourceTemplate {
