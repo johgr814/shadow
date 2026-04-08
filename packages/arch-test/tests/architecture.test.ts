@@ -98,8 +98,11 @@ describe('Cross-package import rules', () => {
     'TemplateBody',
     'Url',
     'Surl',
+    'FileName',
+    'MimeType',
     'ContentTypeHeader',
     'ShadowGitUrlHeader',
+    'GitServerUrl',
   ];
 
   function concreteImportsFromShared(

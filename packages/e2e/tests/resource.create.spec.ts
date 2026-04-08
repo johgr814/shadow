@@ -52,6 +52,7 @@ test('creates resource and redirects to index showing new resource', async ({
   await page.goto('/new-resource');
 
   await page.getByLabel('Resource name').fill('my-template');
+  await page.getByLabel('MIME type').fill('text/plain');
   await page.getByLabel('Template').fill('Hello {{name}}!');
 
   await page.getByRole('button', { name: 'Save' }).click();
@@ -69,6 +70,7 @@ test('stored resource is listed on index after creation', async ({ page }) => {
   await page.goto('/new-resource');
 
   await page.getByLabel('Resource name').fill('my-config');
+  await page.getByLabel('MIME type').fill('text/plain');
   await page.getByLabel('Template').fill('{{! config template }}');
 
   await page.getByRole('button', { name: 'Save' }).click();

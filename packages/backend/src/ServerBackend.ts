@@ -44,6 +44,7 @@ export class ServerBackend implements IBackend {
 
     const body = method.toUpperCase() === 'POST' ? await readBody(req) : null;
 
+    headers.set('x-shadow-git-url', this.config.gitServerUrl.toString());
     const request = new Request(`http://localhost${rawUrl}`, {
       method,
       headers,

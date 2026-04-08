@@ -1,42 +1,61 @@
-import git from 'isomorphic-git';
-import { createFsFromVolume, vol } from 'memfs';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { FileName } from '../src/fileName.js';
+import { MimeType } from '../src/mimeType.js';
 import { TemplateBody } from '../src/resource.js';
 import { GitStorage } from '../src/storage.js';
-import { Surl } from '../src/url.js';
+import { Surl } from '../src/surl.js';
+import { Url } from '../src/url.js';
 
-beforeEach(async () => {
-  vol.reset();
-  vol.mkdirSync('/instances', { recursive: true });
-  await git.init({ fs: createFsFromVolume(vol), dir: '/instances' });
-});
+const REMOTE_URL = 'http://localhost:7000/e2e';
+const BASE_URL = 'http://localhost:3000';
+
+function fileNameFor(name: string): FileName {
+  return FileName.of(name);
+}
+
+function surlFor(name: string): Surl {
+  return Surl.NewResourceUrl(
+    FileName.of(name),
+    Url.of(BASE_URL, '/', null, null),
+  );
+}
 
 describe('GitStorage', () => {
+  it('rejects empty remoteUrl', () => {
+    expect(() => GitStorage.of('')).toThrow('GitServerUrl must not be empty');
+  });
+
+  it('exposes the remoteUrl', () => {
+    const storage = GitStorage.of(REMOTE_URL);
+    expect(storage.remoteUrl.toString()).toBe(REMOTE_URL);
+  });
+
   it('lists no resources on a fresh instance', () => {
-    const storage = new GitStorage();
-    const resources = storage.listResources();
-    expect(resources).toEqual([]);
+    const storage = GitStorage.of(REMOTE_URL);
+    expect(storage.listResources()).toEqual([]);
   });
 
   it('saves a resource and lists it', async () => {
-    const storage = new GitStorage();
-    const surl = Surl.of('my-template', null, null);
-    const body = TemplateBody.of('Hello {{name}}!');
-    await storage.saveResource(surl, { name: surl, body });
-    const resources = storage.listResources();
-    expect(resources).toContain('my-template');
+    const storage = GitStorage.of(REMOTE_URL);
+    const surl = surlFor('my-template');
+    await storage.saveResource(surl, {
+      fileName: fileNameFor('my-template'),
+      mimeType: MimeType.of('text/plain'),
+      body: TemplateBody.of('Hello {{name}}!'),
+    });
+    expect(storage.listResources()).toContain('my-template');
   });
 
   it('saves multiple resources and lists all', async () => {
-    const storage = new GitStorage();
-    const surl1 = Surl.of('template-a', null, null);
-    const surl2 = Surl.of('template-b', null, null);
-    await storage.saveResource(surl1, {
-      name: surl1,
+    const storage = GitStorage.of(REMOTE_URL);
+    await storage.saveResource(surlFor('template-a'), {
+      fileName: fileNameFor('template-a'),
+      mimeType: MimeType.of('text/plain'),
       body: TemplateBody.of('A'),
     });
-    await storage.saveResource(surl2, {
-      name: surl2,
+    await storage.saveResource(surlFor('template-b'), {
+      fileName: fileNameFor('template-b'),
+      mimeType: MimeType.of('text/plain'),
       body: TemplateBody.of('B'),
     });
     const resources = storage.listResources();
@@ -45,9 +64,21 @@ describe('GitStorage', () => {
   });
 
   it('query returns content with the given surl', () => {
-    const storage = new GitStorage();
-    const surl = Surl.of('some-resource', null, null);
+    const storage = GitStorage.of(REMOTE_URL);
+    const surl = surlFor('some-resource');
     const content = storage.query(surl);
     expect(content.surl.toString()).toBe('some-resource');
+  });
+
+  it('two instances are fully isolated', async () => {
+    const storage1 = GitStorage.of(REMOTE_URL);
+    const storage2 = GitStorage.of(REMOTE_URL);
+    await storage1.saveResource(surlFor('only-in-1'), {
+      fileName: fileNameFor('only-in-1'),
+      mimeType: MimeType.of('text/plain'),
+      body: TemplateBody.of('X'),
+    });
+    expect(storage1.listResources()).toContain('only-in-1');
+    expect(storage2.listResources()).not.toContain('only-in-1');
   });
 });

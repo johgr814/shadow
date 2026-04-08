@@ -1,4 +1,4 @@
-import type { Surl } from './url.js';
+import type { Surl } from './surl.js';
 
 export interface IContent {
   readonly surl: Surl;

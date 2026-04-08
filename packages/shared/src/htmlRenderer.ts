@@ -61,6 +61,8 @@ const NEW_RESOURCE_TEMPLATE = `<!DOCTYPE html>
     <form method="POST" action="/">
       <label for="name">Resource name</label>
       <input id="name" name="name" type="text" required placeholder="my-resource" />
+      <label for="mimeType">MIME type</label>
+      <input id="mimeType" name="mimeType" type="text" required placeholder="text/plain" />
       <label for="body">Template</label>
       <textarea id="body" name="body" rows="20" required placeholder="{{! mustache template }}"></textarea>
       <button type="submit">Save</button>

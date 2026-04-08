@@ -2,46 +2,31 @@ import type { ContentTypeHeader, ShadowGitUrlHeader } from './httpHeaders.js';
 
 export class Url {
   private constructor(
-    private readonly value: string,
+    private readonly url: URL,
     readonly contentType: ContentTypeHeader | null,
     readonly shadowGitUrl: ShadowGitUrlHeader | null,
   ) {}
 
   static of(
-    value: string,
+    basePath: string,
+    path: string,
     contentType: ContentTypeHeader | null,
     shadowGitUrl: ShadowGitUrlHeader | null,
   ): Url {
-    if (!value.startsWith('/')) {
-      throw new Error(`Url must start with '/': ${value}`);
+    if (!basePath || basePath.trim().length === 0) {
+      throw new Error('Url basePath must not be empty');
     }
-    return new Url(value, contentType, shadowGitUrl);
+    if (!path.startsWith('/')) {
+      throw new Error(`Url path must start with '/': ${path}`);
+    }
+    return new Url(new URL(path, basePath), contentType, shadowGitUrl);
+  }
+
+  pathname(): string {
+    return this.url.pathname;
   }
 
   toString(): string {
-    return this.value;
-  }
-}
-
-export class Surl {
-  private constructor(
-    private readonly value: string,
-    readonly contentType: ContentTypeHeader | null,
-    readonly shadowGitUrl: ShadowGitUrlHeader | null,
-  ) {}
-
-  static of(
-    value: string,
-    contentType: ContentTypeHeader | null,
-    shadowGitUrl: ShadowGitUrlHeader | null,
-  ): Surl {
-    if (!value || value.trim().length === 0) {
-      throw new Error('Surl must not be empty');
-    }
-    return new Surl(value, contentType, shadowGitUrl);
-  }
-
-  toString(): string {
-    return this.value;
+    return this.url.toString();
   }
 }

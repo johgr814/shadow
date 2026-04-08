@@ -1,16 +1,19 @@
-import { ContentTypeHeader, ShadowGitUrlHeader } from './httpHeaders.js';
-import type { IEngine, IHtmlRenderer, IStorage } from './interfaces.js';
+import { FileName } from './fileName.js';
+import { ShadowGitUrlHeader } from './httpHeaders.js';
+import type { IEngine, IHtmlRenderer } from './interfaces.js';
+import { MimeType } from './mimeType.js';
 import { TemplateBody } from './resource.js';
-import { Surl } from './url.js';
+import { GitStorage } from './storage.js';
+import { Surl } from './surl.js';
+import { Url } from './url.js';
 
 export class Engine implements IEngine {
-  private constructor(
-    private readonly storage: IStorage,
-    private readonly renderer: IHtmlRenderer,
-  ) {}
+  private readonly storageCache = new Map<string, GitStorage>();
 
-  static of(storage: IStorage, renderer: IHtmlRenderer): Engine {
-    return new Engine(storage, renderer);
+  private constructor(private readonly renderer: IHtmlRenderer) {}
+
+  static of(renderer: IHtmlRenderer): Engine {
+    return new Engine(renderer);
   }
 
   async handle(request: Request): Promise<Response> {
@@ -32,27 +35,38 @@ export class Engine implements IEngine {
       return this.handlePost(request);
     }
 
-    return this.handleGet();
+    return this.handleGet(request);
+  }
+
+  private storageFromRequest(request: Request): GitStorage {
+    const rawHeader = request.headers.get('x-shadow-git-url');
+    if (!rawHeader || rawHeader.trim().length === 0) {
+      throw new Error('Missing required header: X-Shadow-Git-URL');
+    }
+    const shadowGitUrl = ShadowGitUrlHeader.of(rawHeader);
+    const key = shadowGitUrl.toString();
+    const cached = this.storageCache.get(key);
+    if (cached !== undefined) {
+      return cached;
+    }
+    const storage = GitStorage.of(key);
+    this.storageCache.set(key, storage);
+    return storage;
   }
 
   private async handlePost(request: Request): Promise<Response> {
-    const rawContentType = request.headers.get('content-type');
-    const rawShadowGitUrl = request.headers.get('x-shadow-git-url');
-
-    const contentType =
-      rawContentType != null ? ContentTypeHeader.of(rawContentType) : null;
-    const shadowGitUrl =
-      rawShadowGitUrl != null ? ShadowGitUrlHeader.of(rawShadowGitUrl) : null;
-
     const bodyText = await request.text();
     const params = parseFormBody(bodyText);
     const errors: string[] = [];
-
     const rawName = params.get('name');
+    const rawMimeType = params.get('mimeType');
     const rawBody = params.get('body');
 
     if (!rawName || rawName.trim().length === 0) {
       errors.push('Resource name is required');
+    }
+    if (!rawMimeType || rawMimeType.trim().length === 0) {
+      errors.push('MIME type is required');
     }
     if (!rawBody || rawBody.trim().length === 0) {
       errors.push('Template body is required');
@@ -68,10 +82,19 @@ export class Engine implements IEngine {
       );
     }
 
-    const surl = Surl.of(rawName as string, contentType, shadowGitUrl);
+    const fileName = FileName.of(rawName as string);
+    const mimeType = MimeType.of(rawMimeType as string);
     const templateBody = TemplateBody.of(rawBody as string);
+    const parsedUrl = new URL(request.url);
+    const requestUrl = Url.of(parsedUrl.origin, parsedUrl.pathname, null, null);
+    const surl = Surl.NewResourceUrl(fileName, requestUrl);
 
-    await this.storage.saveResource(surl, { name: surl, body: templateBody });
+    const storage = this.storageFromRequest(request);
+    await storage.saveResource(surl, {
+      fileName,
+      mimeType,
+      body: templateBody,
+    });
 
     return new Response(null, {
       status: 303,
@@ -79,8 +102,9 @@ export class Engine implements IEngine {
     });
   }
 
-  private handleGet(): Response {
-    const resources = this.storage.listResources();
+  private handleGet(request: Request): Response {
+    const storage = this.storageFromRequest(request);
+    const resources = storage.listResources();
     return new Response(this.renderer.renderIndex({ resources }).toString(), {
       status: 200,
       headers: { 'Content-Type': 'text/html; charset=utf-8' },
